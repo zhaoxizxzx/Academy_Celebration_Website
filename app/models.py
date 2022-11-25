@@ -66,6 +66,8 @@ class Article(models.Model):
                                   )
     def __str__(self):
         return self.title
+    class Meta:
+        verbose_name_plural = '文章表'
 
 class Article2Tag(models.Model):
     article = models.ForeignKey(to='Article',on_delete = models.CASCADE)
@@ -89,3 +91,16 @@ class Comment(models.Model):
     #自关联
     parent = models.ForeignKey(to='self',null=True,blank = True, on_delete =  models.CASCADE)
 
+#班级搜索表
+class ClassesRecode(models.Model):
+    name = models.CharField(verbose_name='姓名',max_length=32)
+    Student_ID = models.CharField(verbose_name='学号',max_length=32)
+    campus = models.CharField(verbose_name='校区',max_length=32)
+    grade = models.CharField(verbose_name='年级',max_length=32)
+    major = models.CharField(verbose_name='专业',max_length=32)
+    education = models.CharField(verbose_name='学历',max_length=32)
+    Class = models.CharField(verbose_name='班级',max_length=32)
+    class_name = models.CharField(verbose_name='班级名',max_length=256)
+#外键
+
+    user = models.ForeignKey(to='UserInfo',null=True, on_delete=models.CASCADE)

@@ -10,11 +10,25 @@ from django.db.models import Count  # 计数，聚合函数
 from django.db.models.functions import TruncMonth
 from django.contrib import auth
 from django.db.models import F
-from bbs import settings#新增的
+from bbs import settings #新增的
 from PIL import Image, ImageDraw, ImageFont
 
 from app.myforms import MyRegForm
 from app import models
+
+
+###########################################
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.generics import GenericAPIView
+from rest_framework import serializers
+from django_filters.rest_framework.filterset import FilterSet
+from django_filters import filters
+
+####################################################################
+from io import  BytesIO
+from PIL_paste import *
+from AI_img_api import *
+from myrandom_code import *
 
 
 def login(request):
@@ -26,7 +40,7 @@ def login(request):
         # 从session中获取code
         code = request.POST.get('code')
         # 1、验证码校验，内部统一转大小写
-        if request.session.get('code').upper() == code.upper():
+        if request.session.get('code') == code:
             # 2、校验应户名和密码是否正确--UserInfo
             user_obj = auth.authenticate(
                 request, username=username, password=password)
@@ -36,6 +50,7 @@ def login(request):
                 auth.login(request, user_obj)
                 response_dic['msg'] = '登录成功'
                 response_dic['url'] = '/home/'
+                #print(request.user.is_authenticated)
             else:
                 response_dic['code'] = 2000
                 response_dic['msg'] = '用户名或密码错误'
@@ -55,41 +70,47 @@ def get_random_color():
 
 
 def get_code(request):
-    img_obj = Image.new('RGB', (430, 35), get_random_color())
-    img_draw = ImageDraw.Draw(img_obj)  # 产生一个画笔对象
-    img_font = ImageFont.truetype('static/font/222.ttf', 30)  # 字体样式
-    # 写水机验证码   5位数，包含数字、小写字母、大写字母
-    code = ''
-    for i in range(5):
-        randow_upper = chr(random.randint(65, 98))
-        randow_lower = chr(random.randint(97, 122))
-        random_int = str(random.randint(0, 9))
-        # 从上面的三个里面随机选择一个
-        tmp = random.choice([randow_upper, randow_lower, random_int])
-        # 将产生的随机字符串写到图片上
-        # '''一个一个去写入'''
-        img_draw.text((i*45+30, 0), tmp, get_random_color(), img_font)
-        # 拼接随机字符串
-        code += tmp
-    print(code)
+    # img_obj = Image.new('RGB', (430, 35), get_random_color())
+    # img_draw = ImageDraw.Draw(img_obj)  # 产生一个画笔对象
+    # img_font = ImageFont.truetype('static/font/222.ttf', 30)  # 字体样式
+    # # 写水机验证码   5位数，包含数字、小写字母、大写字母
+    # code = ''
+    # for i in range(5):
+    #     randow_upper = chr(random.randint(65, 98))
+    #     randow_lower = chr(random.randint(97, 122))
+    #     random_int = str(random.randint(0, 9))
+    #     # 从上面的三个里面随机选择一个
+    #     tmp = random.choice([randow_upper, randow_lower, random_int])
+    #     # 将产生的随机字符串写到图片上
+    #     # '''一个一个去写入'''
+    #     img_draw.text((i*45+30, 0), tmp, get_random_color(), img_font)
+    #     # 拼接随机字符串
+    #     code += tmp
+    # print(code)
+    #
+    # # 添加干扰点和线
+    # width = 320
+    # height = 35
+    # for i in range(5):
+    #     x1 = random.randint(0, width)
+    #     x2 = random.randint(0, width)
+    #     y1 = random.randint(0, height)
+    #     y2 = random.randint(0, height)
+    #     img_draw.line((x1, y1, x2, y2), fill=get_random_color())
+    #
+    # for i in range(55):
+    #     x = random.randint(0, width)
+    #     y = random.randint(0, height)
+    #     img_draw.point((x, y), fill=get_random_color())
 
-    # 添加干扰点和线
-    width = 320
-    height = 35
-    for i in range(5):
-        x1 = random.randint(0, width)
-        x2 = random.randint(0, width)
-        y1 = random.randint(0, height)
-        y2 = random.randint(0, height)
-        img_draw.line((x1, y1, x2, y2), fill=get_random_color())
-
-    for i in range(55):
-        x = random.randint(0, width)
-        y = random.randint(0, height)
-        img_draw.point((x, y), fill=get_random_color())
-
+   #
+    mycode_list = random_code()
+    print(mycode_list[0])
+    code_sum = str(eval(mycode_list[0]))
+    print(code_sum)
+    img_obj = mycode_list[2]
     # 传输正确验证码
-    request.session['code'] = code
+    request.session['code'] = code_sum
     # 存在内存对象中
     io_obj = BytesIO()
     img_obj.save(io_obj, 'png')
@@ -136,7 +157,38 @@ def home(request):
     # 查询本网站所有的文章数据展示到前端页面，这里可以使用分页器分页
     article_queryset = models.Article.objects.all()
     # print(article_queryset)
+    print(request.user.is_authenticated)
     return render(request, 'home.html', locals())
+
+#接口实现主页
+def home_site(request):
+    # 查询本网站所有的文章数据展示到前端页面，这里可以使用分页器分页
+    article_list = []
+    response_dic = {'code': 1000, 'message': 0, 'data': {'article_list': article_list}}
+    article_l = models.Article.objects.all()
+
+    for i in article_l:
+        article_list.append({
+            'title': i.title,
+            'desc': i.desc,
+            'create_time': i.create_time,
+
+        })
+    return JsonResponse(response_dic)
+#############################################################
+
+# class ArticleSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = models.Article
+#         fields = "__all__"
+#
+# class homeview(ListModelMixin, GenericAPIView):
+#     queryset = models.Article.objects.all()
+#     serializer_class = ArticleSerializer
+#
+#     def get(self, request):
+#         return self.list(request)
+#####################################################################
 
 # 注销
 
@@ -190,6 +242,80 @@ def site(request, username, **kwargs):
 
     return render(request, 'site.html', locals())
 
+
+def my_site(request, username, **kwargs):    #接口实现我的帖子
+    # 校验当前用户名是否存在
+
+    article_list = []
+    response_dic = {'code': 1000, 'message': "success", 'data': {'article_list': article_list}}
+
+    user_obj = models.UserInfo.objects.filter(username=username).first()
+
+    blog = user_obj.blog
+    # 获取站点文章
+    article_l = models.Article.objects.filter(blog=blog)
+
+    for i in article_l:
+        article_list.append({
+            'title': i.title,
+            'desc': i.desc,
+            'create_time': i.create_time,
+            'up_num': i.up_num,
+            'username':models.UserInfo.objects.filter(blog=i.blog_id).first().username
+
+
+    })
+    return JsonResponse(response_dic)
+
+
+
+    # 用户存在，进入用户站点
+    # blog = user_obj.blog
+    # 获取站点文章
+    article_list = models.Article.objects.filter(blog=blog)
+    # kwargs条件筛选 article_list
+    # if kwargs:
+    #     # print(kwargs)     #{'condition': 'tag', 'param': '1'}
+    #     condition = kwargs.get('condition')
+    #     param = kwargs.get('param')
+    #     if condition == 'category':
+    #         article_list = article_list.filter(category_id=param)
+    #     elif condition == 'tag':
+    #         article_list = article_list.filter(tags=param)
+    #     else:
+    #         year, month = param.split('-')  # 2018-11   2018.11  解压赋值
+    #         article_list = article_list.filter(create_time__year=year, create_time__month=month)
+    # print(article_list)
+    #
+    # # pk--primary key
+    # # 1、取出当前站点的文章分类和及其文章数
+    # category_list = models.Category.objects.all().annotate(count_num=Count('article__pk')).values_list('name',
+    #                                                                                                    'count_num',
+    #                                                                                                    'pk')  # 修改过
+    # print(category_list)
+
+    # # 2、查询当前用户的标签及吧标签下的文章数
+    # tag_list = models.Tag.objects.filter(blog=blog).annotate(
+    #     count_num=Count('article__pk')).values_list('name', 'count_num', 'pk')
+    # # print(tag_list)
+
+    # # 3、按照年月来统计所有的文章
+    # date_list = models.Article.objects.filter(blog=blog).annotate(month=TruncMonth('create_time')).values(
+    #     'month').annotate(count_num=Count('pk')).values_list('month', 'count_num')
+    # # print(date_list)
+
+    #
+
+#################################################################################
+# class SiteView(RetrieveModelMixin, GenericAPIView):
+#     queryset = models.Article.objects.all()
+#     serializer_class = ArticleSerializer
+#
+#     def get(self, request, pk):
+#         return self.retrieve(request)
+
+
+#################################################################################
 # 文章详情
 
 
@@ -263,6 +389,7 @@ def comment(request):
     # 自己也可以评论自己
     if request.method == 'POST':
         response_dic = {'code': 1000, 'msg': "", 'pname':""}
+        #print(request.user.is_authenticated)
         if request.user.is_authenticated:
             article_id = request.POST.get('article_id')
             content = request.POST.get('content')
@@ -390,7 +517,89 @@ def set_avatar(request):
     return render(request,'set_avatar.html',locals())
 
 #删除文章(新增)
+# def delete_article(request):
+#     nid = request.GET.get('nid')
+#     models.Article.objects.filter(id=nid).delete()
+#     return redirect("/backend/")
+
 def delete_article(request):
     nid = request.GET.get('nid')
     models.Article.objects.filter(id=nid).delete()
-    return redirect("/backend/")
+    response_dic = {'code': 1000, 'message': "success"}
+    return JsonResponse(response_dic)
+
+#虚拟合影测试
+def AI_PIL(request):
+    if request.method == "POST":
+        # t=request.FILES['img']
+        # file_Bytesio = BytesIO()
+        # t.save(file_Bytesio)
+
+
+        file_list  =  request.FILES
+        img  = file_list['img']
+        dt = time.strftime("%Y年%m月%d日%X")
+
+        nt = dt.replace(":", "时", 1)
+        nt = nt.replace(":", "分", 1)
+        nt = nt + "秒"
+        img_name =  request.POST.get("img_name")
+        print(img_name)
+        with open(img_name,"wb") as f:
+            for i in img:
+                f.write(i)
+        new_file_name = AI_img2nobg(img_name)  # AI转换
+
+       # res_PIL_name = composite_picture("preview(1).png",new_file_name,100,100,500,500)
+        dict_test = {"img_paste":new_file_name}
+
+
+        return JsonResponse(dict_test)
+#班级搜索 创建班级
+def add_myclass(request):      #接口实现添加班级
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        Student_ID= request.POST.get('Student_ID')
+        campus = request.POST.get('campus')
+        grade = request.POST.get('grade')
+        major = request.POST.get('major')
+        education = request.POST.get('education')
+        Class = request.POST.get('Class')
+        user = request.user
+        class_name = campus+grade+major+education+Class
+        models.ClassesRecode.objects.update_or_create(name=name,Student_ID=Student_ID,campus=campus,grade=grade,major=major,education=education,Class=Class,class_name=class_name,user=user)
+        response_dic = {'code': 1000, 'message': "success"}
+        return JsonResponse(response_dic)
+    else:
+        class_list = []
+        response_dic = {'code': 1001, 'message': "My classes", 'data': {'class_list': class_list}}
+        class_l = models.ClassesRecode.objects.filter(user=request.user)
+        for i in class_l:
+            class_list.append({
+                'campus': i.campus,
+                'grade': i.grade,
+                'major': i.major,
+                'education': i.education,
+                'Class': i.Class
+            })
+        return JsonResponse(response_dic)
+
+def search_class(request):     #接口实现班级搜索
+    if request.method == 'POST':
+        campus = request.POST.get('campus')
+        grade = request.POST.get('grade')
+        major = request.POST.get('major')
+        education = request.POST.get('education')
+        Class = request.POST.get('Class')
+        class_name = campus+grade+major+education+Class
+        class_l = models.ClassesRecode.objects.filter(class_name=class_name)
+        class_list=[]
+        response_dic = {'code': 1000, 'message': "success", 'data': {'class_list': class_list}}
+        for i in class_l:
+            class_list.append({
+                'name': i.name,
+                'Student_ID': i.Student_ID
+
+
+            })
+        return JsonResponse(response_dic)

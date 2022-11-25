@@ -24,7 +24,7 @@ from app import views
 urlpatterns = [
     #后台管理
     url(r'^admin/', admin.site.urls),
-    
+    url(r'^AI_PIL/', views.AI_PIL, name='AI_PIL'),
     #用户首页
     url(r'^$', views.home,name='home'),
     url(r'^home/', views.home,name='home'),
@@ -61,8 +61,20 @@ urlpatterns = [
     #侧边栏的筛选功能
     url(r'^(?P<username>\w+)/(?P<condition>|category|tag|archive)/(?P<param>.*)/',views.site),
     #文章浏览页
-    url(r'^(?P<username>\w+)/article/(?P<article_id>\d+)/',views.article_detail)
+    url(r'^(?P<username>\w+)/article/(?P<article_id>\d+)/',views.article_detail),
 
-    
+    #################################################################################################
+    url(r'^bbs/home/', views.home_site,name='home_site'),  #接口实现主页
+
+    url(r'^bbs/add_myclass/',views.add_myclass,name='add_myclass'),    #接口实现添加班级
+    url(r'^bbs/search_class/',views.search_class,name='search_class'),   #接口实现班级搜索
+
+    url(r'^bbs/(?P<username>\w+)/$',views.my_site,name='my_site'),     #接口实现我的帖子
+
+
+
+
+
+
 
 ]
