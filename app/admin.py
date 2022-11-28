@@ -1,9 +1,9 @@
 from django.contrib import admin
 from app import models
 
-admin.site.site_title = "系统后台"
+admin.site.site_title = "后台管理"
 
-admin.site.site_header = "管理员登录"
+admin.site.site_header = "后台管理"
 
 admin.site.index_title = "后台管理"
 #admin注册表
