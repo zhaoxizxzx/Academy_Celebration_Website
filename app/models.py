@@ -50,7 +50,7 @@ class Article(models.Model):
     desc = models.CharField(verbose_name='文章简介',max_length=255)
     content = models.TextField(verbose_name='文章内容')
     create_time = models.DateField(auto_now_add=True)
-    # create_time = models.DateTimeField(auto_now_add=True)
+    #create_time = models.DateTimeField(auto_now_add=True)
 
     #数据库设计优化
     up_num = models.BigIntegerField(verbose_name='点赞数',default=0)
@@ -84,7 +84,7 @@ class Comment(models.Model):
     user = models.ForeignKey(to='UserInfo',on_delete = models.CASCADE)
     article = models.ForeignKey(to='Article',on_delete =  models.CASCADE)
     content = models.CharField(verbose_name='评论',max_length=255)
-    # content_time = models.DateTimeField(auto_now_add=True)
+    #create_time = models.DateTimeField(auto_now_add=True)
     #comment_num = models.IntegerField(default=0)
     #up_num = models.IntegerField(default=0)
     #down_num = models.IntegerField(default=0)
@@ -104,3 +104,11 @@ class ClassesRecode(models.Model):
 #外键
 
     user = models.ForeignKey(to='UserInfo',null=True, on_delete=models.CASCADE)
+
+#消息表
+# class message(models.Model):
+#     msg = models.CharField(verbose_name='内容', max_length=255)
+#     send_user = models.ForeignKey(to='UserInfo',on_delete = models.SET_NULL)
+#     receive_user = models.ForeignKey(to='UserInfo', on_delete=models.SET_NULL)
+#     create_time =  models.DateTimeField(verbose_name='私信时间')
+      #msg_type = models.CharField(verbose_name='消息类型',max_length=32)
