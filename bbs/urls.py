@@ -24,12 +24,13 @@ from app import views
 urlpatterns = [
     #后台管理
     url(r'^admin/', admin.site.urls),
-    url(r'^AI_PIL/', views.AI_PIL, name='AI_PIL'),
     #用户首页
     url(r'^$', views.home,name='home'),
     url(r'^home/', views.home,name='home'),
     #注册
     url(r'^register/', views.register,name='register'),
+    #邮箱注册
+    url(r'^register_email/', views.register_email,name='register_email'),
     #暴露后端用户头像数据文件夹
     url(r'^media/(?P<path>.*)',serve,{'document_root':settings.MEDIA_ROOT}),
     #登录
@@ -57,19 +58,35 @@ urlpatterns = [
     
     
     #个人站点
-    url(r'^(?P<username>\w+)/$',views.site,name='site'),
-    #侧边栏的筛选功能
-    url(r'^(?P<username>\w+)/(?P<condition>|category|tag|archive)/(?P<param>.*)/',views.site),
-    #文章浏览页
-    url(r'^(?P<username>\w+)/article/(?P<article_id>\d+)/',views.article_detail),
+    # url(r'^(?P<username>\w+)/$',views.site,name='site'),
+    # #侧边栏的筛选功能
+    # url(r'^(?P<username>\w+)/(?P<condition>|category|tag|archive)/(?P<param>.*)/',views.site),
+    # #文章浏览页
+    # url(r'^(?P<username>\w+)/article/(?P<article_id>\d+)/',views.article_detail),
 
     #################################################################################################
-    url(r'^bbs/home/', views.home_site,name='home_site'),  #接口实现主页
 
-    url(r'^bbs/add_myclass/',views.add_myclass,name='add_myclass'),    #接口实现添加班级
-    url(r'^bbs/search_class/',views.search_class,name='search_class'),   #接口实现班级搜索
 
-    url(r'^bbs/(?P<username>\w+)/$',views.my_site,name='my_site'),     #接口实现我的帖子
+    url(r'^bbs/home/', views.home_site,name='bbs_home_site'),  #接口实现主页
+    url(r'^bbs/register/', views.bbs_register,name='bbs_register'),
+    url(r'^bbs/get_code/', views.bbs_get_code,name='bbs_get_code'),
+    url(r'^bbs/login/', views.bbs_login,name='bbs_login'),
+    url(r'^bbs/register_email/', views.bbs_register_email,name='bbs_register_email'),
+    url(r'^bbs/logout/', views.bbs_logout,name='bbs_logout'),
+    url(r'^bbs/my_site/',views.bbs_my_site,name='bbs_my_site'),
+    url(r'^bbs/up_or_down/',views.bbs_up_or_down),
+    url(r'^bbs/comment/', views.bbs_comment,name='bbs_comment'),
+    url(r'^bbs/delete/article/', views.bbs_delete_article,name='bbs_delete_article'),
+    url(r'^bbs/add/article/', views.bbs_add_article,name='bbs_add_article'),
+    url(r'^bbs/add_myclass/',views.add_myclass,name='bbs_add_myclass'),    #接口实现添加班级
+    url(r'^bbs/search_class/',views.search_class,name='bbs_search_class'),   #接口实现班级搜索
+    url(r'^bbs/AI_PIL/', views.AI_PIL, name='bbs_AI_PIL'),
+    url(r'^bbs/comment_to_me/', views.comment_to_me, name='comment_to_me'),
+
+
+#文章浏览页
+    url(r'^bbs/article/(?P<article_id>\d+)/',views.bbs_article_detail),
+
 
 
 
