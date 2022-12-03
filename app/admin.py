@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from app import models
 
 admin.site.site_title = "后台管理"
@@ -7,7 +8,7 @@ admin.site.site_header = "后台管理"
 
 admin.site.index_title = "后台管理"
 #admin注册表
-admin.site.register(models.UserInfo)
+admin.site.register(models.UserInfo,UserAdmin)
 admin.site.register(models.Blog)
 admin.site.register(models.Category)
 admin.site.register(models.Tag)
