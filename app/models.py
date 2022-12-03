@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.contrib import admin
 #用户表
 class UserInfo(AbstractUser):
     phone = models.BigIntegerField(null=True,verbose_name='手机号',blank=True)
@@ -14,7 +14,7 @@ class UserInfo(AbstractUser):
     blog = models.OneToOneField(to='Blog',null=True,on_delete = models.SET_NULL)
 
     class Meta:
-        verbose_name_plural = '用户表'
+        verbose_name_plural = '用户管理'
         # verbose_name = '用户表'
 
 #博客表
@@ -26,7 +26,8 @@ class Blog(models.Model):
 
     def __str__(self):
         return self.site_name
-
+    class Meta:
+        verbose_name_plural = '博客管理'
 #分类表
 class Category(models.Model):
     name = models.CharField(verbose_name='文章分类',max_length=32)
@@ -35,7 +36,8 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-
+    class Meta:
+        verbose_name_plural = '分类管理'
 #标签表
 class Tag(models.Model):
     name = models.CharField(verbose_name='文章标签', max_length=32)
@@ -67,7 +69,7 @@ class Article(models.Model):
     def __str__(self):
         return self.title
     class Meta:
-        verbose_name_plural = '文章表'
+        verbose_name_plural = '文章管理'
 
 class Article2Tag(models.Model):
     article = models.ForeignKey(to='Article',on_delete = models.CASCADE)
@@ -78,7 +80,8 @@ class UpAndDown(models.Model):
     user = models.ForeignKey(to='UserInfo',on_delete = models.CASCADE)
     article = models.ForeignKey(to='Article',on_delete = models.CASCADE)
     is_up = models.BooleanField()
-
+    class Meta:
+        verbose_name_plural = '点赞情况'
 #评论表
 class Comment(models.Model):
     user = models.ForeignKey(to='UserInfo',on_delete = models.CASCADE)
@@ -90,7 +93,10 @@ class Comment(models.Model):
     #down_num = models.IntegerField(default=0)
     #自关联
     parent = models.ForeignKey(to='self',null=True,blank = True, on_delete =  models.CASCADE)
-
+    def __str__(self):
+        return self.content
+    class Meta:
+        verbose_name_plural = '评论管理'
 #班级搜索表
 class ClassesRecode(models.Model):
     name = models.CharField(verbose_name='姓名',max_length=32)
@@ -104,6 +110,11 @@ class ClassesRecode(models.Model):
 #外键
 
     user = models.ForeignKey(to='UserInfo',null=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.class_name+'  '+self.name
+    class Meta:
+        verbose_name_plural = '班级管理'
 
 #消息表
 # class message(models.Model):
