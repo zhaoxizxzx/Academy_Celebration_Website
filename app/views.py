@@ -61,6 +61,7 @@ def login(request):
 
     return render(request, 'login.html')
 
+##
 def bbs_login(request):
     response_dic = {'code': 1000, 'msg': '登陆成功'}
     if request.method == 'POST':
