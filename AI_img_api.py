@@ -5,6 +5,8 @@ import requests
 import base64
 import requests
 import io
+from io import BytesIO, StringIO
+
 from PIL import Image
 
 
@@ -36,7 +38,7 @@ from PIL import Image
     # encoding:utf-8
 
 
-def AI_img2nobg(img_name):
+def AI_img2nobg(img):
 
 
 
@@ -44,14 +46,16 @@ def AI_img2nobg(img_name):
     request_url = "https://aip.baidubce.com/rest/2.0/image-classify/v1/body_seg"
 
 
+    # base64_str='data:image/jpeg;base64,%s' % base64.b64encode(byte_data).decode()
+    img_64=base64.b64encode(img.file.read()).decode()
     # 二进制方式打开图片文件
-    f = open(img_name, 'rb')
-    img = base64.b64encode(f.read()) # 使用base64 编码
+   
+    # img_64 = base64.b64encode(img) # 使用base64 编码
 
 
 
 
-    params = {"image": img}
+    params = {"image": img_64}
     access_token = '[24.2b26d773c2f13dadfcc1b670117aaf8d.2592000.1673771311.282335-29097173]' ## asscee_token
         # 这个是百度 的接口 需要自己获取
 
@@ -62,12 +66,14 @@ def AI_img2nobg(img_name):
         res = response.json()
         img = res["foreground"]
         # print(response.json())
-        print(img)
-        imgdata = base64.b64decode(img)
-        image = io.BytesIO(imgdata)
-        image = Image.open(image)
-        with open("imageToSave.png", "wb") as fh:
-            fh.write(imgdata)
+        # print(img)
+    
+        # imgdata = base64.b64decode(img)
+        # image = io.BytesIO(imgdata)
+        # image = Image.open(image)
+        # with open("imageToSave.png", "wb") as fh:
+        #     fh.write(imgdata)
+        return img
 
 
 ############# 这个是获取token的代码
