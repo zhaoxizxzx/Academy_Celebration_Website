@@ -13,19 +13,7 @@
         <div>
             <textarea name="content" id="id_content" cols="60" rows="16"></textarea>
         </div>
-        <p>分类</p>
-        <div>
-            {% for category in category_list %}
-                <input type="radio" value="{{ category.pk }}" name="category">{{ category.name }}
-            {% endfor %}
-        </div>
-        <p>标签</p>
-        <div>
-            {% for tag in tags_list %}
-                <input type="checkbox" value="{{ tag.pk }}" name="tag">{{ tag.name }}
-            {% endfor %}
-        </div>
-        <input type="submit" class="btn btn-danger">
+        <input type="submit" id = 'submit' class="btn btn-danger">
     </form>
     
     {% block js %}
@@ -46,13 +34,15 @@
                         'flash', 'media', 'insertfile', 'table', 'hr', 'emoticons', 'baidumap', 'pagebreak',
                         'anchor', 'link', 'unlink', '|', 'about'
                     ],
-                    uploadJson : '/upload_image/',        //文件上传的路径
+                    uploadJson : '/upload_image/',        //文件上传的url
                     extraFileUploadParams : {
-                        csrfmiddlewaretoken: '{{ csrf_token }}'
-                }
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    }
                     // {#resizeType: 0#}
                 });
             });
+
+            
         </script>
     {% endblock %}
 {% endblock %}

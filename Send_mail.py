@@ -38,5 +38,5 @@ class SendEmail:
 
 #调用
 #receiver里放上发送对象的邮箱
-verification = SendEmail(receiver='236238@qq.com').send_email()
-print(verification)
+# verification = SendEmail(receiver='236238@qq.com').send_email()
+# print(verification)

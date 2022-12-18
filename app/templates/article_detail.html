@@ -2,6 +2,7 @@
 
 {% block css %}
     <style>
+
         #div_digg {
             float: right;
             margin-bottom: 10px;
@@ -28,35 +29,54 @@
             margin-left: 20px;
             width: 46px;
             height: 52px;
-            background: url('/static/img/downdown.gif') no-repeat;
+            background: url('/static/img/点赞.png') no-repeat;
             text-align: center;
             cursor: pointer;
             margin-top: 2px;
-            padding-top: 5px;
+            /* padding-top: 5px; */
         }
 
         .clear {
             clear: both;
         }
+
+        .col-md-9 h1 {
+            font-weight: bold;
+        }
+        
+        .article_content p{
+            margin-top: 5%;
+            font-size: 20px;
+            word-wrap: break-word;
+        }
+
     </style>
 
 {% endblock %}
 
 {% block content %}
-    <h1>{{ article_obj.title }}</h1>
+<div class="row" style="color: #ca4a3c;width:146%;">
+    <div class="col-md-9">
+
+    <h1 style="color: #a1382c;">{{ article_obj.title }}</h1>
     <div class="article_content">
-        {{ article_obj.content|safe }}
+    <p>{{ article_obj.content|safe }}</p>    
     </div>
 
     <!-- {# 点赞点踩开始 #} -->
     <div class="clearfix">
         <div id="div_digg">
             <!-- {#<div class="diggit" onclick="votePost(15416928,'Digg')">#} -->
-            <div class="diggit action">
+            <!-- <div class="diggit action">
                 <span class="diggnum" id="digg_count">{{ article_obj.up_num }}</span>
-            </div>
+            </div> -->
             <div class="buryit action">
-                <span class="burynum" id="bury_count">{{ article_obj.down_num }}</span>
+                <span class="burynum" 
+                    id="bury_count"
+                    style="margin: 100%;
+                        font-size: 25px;">
+                    {{ article_obj.up_num }}
+                </span>
             </div>
             <div class="clear"></div>
             <div class="diggword" id="digg_tips" style="color: red">
@@ -101,7 +121,8 @@
             <span style="color: red" id="error"></span>
         </div>
     {% endif %}
-
+</div>
+</div>
 {% endblock %}
 
 {% block js %}
@@ -113,24 +134,16 @@
             //alert(isUp)
             let cur_span = $(this).children('span')
             $.ajax({
-                url: '/up_or_down/',
+                url: '/bbs/like/',
                 type: 'post',
                 data: {
                     'article_id': '{{article_obj.pk}}',
-                    'is_up': isUp,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    // 'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function (args) {
                     // 成功点赞/踩
-                    if (args.code == 1000) {
-                        $('#digg_tips').text(args.msg)
-                        // 网页不会被刷新--使点赞/踩数静态+1
-                        cur_span.text(Number(cur_span.text()) + 1)
-                    }
-                    // 无法点赞/踩--输出错误信息
-                    else {
-                        $('#digg_tips').html(args.msg)
-                    }
+                    $('#digg_tips').html(args.msg)
+                    
                 }
 
             })
@@ -149,13 +162,13 @@
                 conTent = conTent.slice(indexNum)
             }
             $.ajax({
-                url: "/comment/",
+                url: "/bbs/comment/",
                 type: "post",
                 data: {
                     'article_id': '{{ article_obj.pk }}',
                     'content': conTent,
                     'parent_id':parentId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    // 'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function (args) {
                     // 评论成功
@@ -164,26 +177,26 @@
                         //将评论框的内容清空
                         $('#id_comment').val('')
 
-                        {#//静态临时渲染评论楼#}
-                        {#let username = '{{ request.user.username }}';#}
-                        {#let temp = `#}
-                        {# <li class="list-group-item">#}
-                        {#    <span>${username}</span>#}
-                        {#    <span><a href="#" class="pull-right">回复</a></span>#}
-                        {#    <div>#}
-                        {#        ${args.pname}${conTent}#}
-                        {#    </div>#}
-                        {#    </li>#}
-                        {#`#}
-                        {#$('.list-group').append(temp)#}
+                        // //静态临时渲染评论楼
+                        // let username = '{{ request.user.username }}';
+                        // let temp = `
+                        //  <li class="list-group-item">
+                        //     <span>${username}</span>
+                        //     <span><a href="#" class="pull-right">回复</a></span>
+                        //     <div>
+                        //         ${args.pname}${conTent}
+                        //     </div>
+                        //     </li>
+                        // `
+                        // $('.list-group').append(temp)
                         window.setTimeout(function ()
                         {
-                        window.location.reload()
+                            window.location.reload()
                         },500)
-
                     }
                 }
             })
+            
         })
 
         // 回复
