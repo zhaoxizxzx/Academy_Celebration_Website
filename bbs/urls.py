@@ -26,6 +26,9 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     #暴露后端用户数据文件夹
     url(r'^media/(?P<path>.*)',serve,{'document_root':settings.MEDIA_ROOT}),
+
+    # 院庆日程
+    url(r'^schedule/', views.schedule,name='bbs_home'),  
     #首页
     # url(r'^$', views.bbs_home,name='home'),
     url(r'^bbs/home/', views.bbs_home,name='bbs_home'),  
@@ -40,6 +43,8 @@ urlpatterns = [
     url(r'^bbs/get_register_code/', views.bbs_register_email,name='bbs_register_email'),
     # 注销
     url(r'^bbs/logout/', views.bbs_logout,name='bbs_logout'),
+    # 获取用户头像
+    url(r'^bbs/get_avatar/', views.bbs_get_avatar,name='bbs_get_avatar'),
 
      # 文章详情
     # url(r'^bbs/article/',views.bbs_article_detail),

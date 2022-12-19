@@ -39,6 +39,11 @@ from AI_img_api import *
 from myrandom_code import *
 from Send_mail import SendEmail
 
+
+# 院庆日程
+def schedule(request):
+    return render(request, 'schedul/schedule.html')
+
 # 登陆--Done
 def bbs_login(request):
     # print(request.user.is_authenticated,request.user.username)
@@ -55,7 +60,7 @@ def bbs_login(request):
                 avatar = models.UserInfo.objects.filter(pk=user_obj.id).first().avatar
                 base64_str='data:image/jpeg;base64,%s' % base64.b64encode(avatar.file.read()).decode()
 
-                response_dic['data'] = {'username':username, 'email':user_obj.email,'avatar':'http://www.fzuprrxd.work/media/%s' % avatar,}
+                response_dic['data'] = {'username':username, 'email':user_obj.email,'avatar':base64_str,}
                 response_dic['msg'] = '登录成功'
             else:
                 response_dic['code'] = 2000
@@ -63,47 +68,10 @@ def bbs_login(request):
         else:
             response_dic['code'] = 3000
             response_dic['msg'] = '验证码错误'
-        print(response_dic)
+        # print(response_dic)
         print(request.user.is_authenticated,request.user.username)
 
         return JsonResponse(response_dic)
-
-# 测试版登陆
-# def bbs_login(request):
-#     response_dic = {'code': 2000, 'msg': '登陆失败', 'data':''}
-#     print(request.session.get('code'))
-#     if request.method == 'POST':
-#         print(request.user.is_authenticated,request.user.username)
-#         username = request.POST.get('username')
-#         # print(username)
-#         password = request.POST.get('password')
-#         # print(password)
-#         user_obj = auth.authenticate(request, username=username, password=password)
-#         if user_obj:
-#             # 保存用户状态
-#             # auth.logout(request)
-#             auth.login(request, user_obj)
-#             response_dic['msg'] = '登录成功'
-#             response_dic['code'] = 1000
-
-#             avatar = models.UserInfo.objects.filter(pk=user_obj.id).first().avatar
-#             base64_str='data:image/jpeg;base64,%s' % base64.b64encode(avatar.file.read()).decode()
-#             # response_dic['data'] = {'avatar':'http://www.fzuprrxd.work/media/'+avatar.name}
-#             # response_dic['data'] = {'username':username, 'email':user_obj.email,'avatar':base64_str}
-#             response_dic['data'] = {'username':username, 'email':user_obj.email,'avatar':'http://www.fzuprrxd.work/media/%s' % avatar,}
-            
-#         print(request.user.is_authenticated,request.user.username)
-        
-#         print(request.user.username)
-#         # user_msg.append({
-#         #     'username': request.user.username,
-#         #     'name': request.user.name,
-#         #     'email': request.user.email
-
-#         # })
-#         #print(response_dic)
-
-#         return JsonResponse(response_dic)
 
 # 获取随机的颜色  RGB
 def get_random_color():
@@ -130,6 +98,7 @@ def bbs_get_code(request):
 
 # 注册函数--Done
 def bbs_register(request):
+    # print(request.body)
     response_dic = {"code": 1000, "msg": 'success'}
     code = request.session.get("email_code")
     user_code = request.POST.get("email_code")
@@ -144,7 +113,11 @@ def bbs_register(request):
         if form_obj.is_valid():
             clean_data = form_obj.cleaned_data
             clean_data.pop('confirm_password')
-            avatar_obj = request.FILES.get('avatar')
+            # avatar_obj = request.POST.get('avatar')
+            # avatar_obj = request.FILES.get('avatar')
+            avatar_obj = request.FILES.get('file')
+            # print(request.FILES)
+            print(avatar_obj)
             if avatar_obj:
                 clean_data['avatar'] = avatar_obj
             # 数据库保存数据
@@ -194,15 +167,14 @@ def bbs_home(request):
 @login_required
 def bbs_logout(request):
     auth.logout(request)
-    print(request.user.username)
-    print('11')
+    print(request.user.username,'--logout')
     response_dic = {}
     response_dic['code'] = 1000
     response_dic['msg'] = 'success'
     return JsonResponse(response_dic)
 
 #接口实现我的帖子
-# @login_required
+@login_required
 def bbs_my_site(request):    
     article_list = []
     response_dic = {'code': 1000, 'message': "success", 'data': {'article_list': article_list}}
@@ -211,8 +183,6 @@ def bbs_my_site(request):
     user_obj = models.UserInfo.objects.filter(username=username).first()
     # 获取站点文章
     article_l = models.Article.objects.filter(user_id=user_obj.id).order_by('-create_time')
-    print(article_l)
-    # print(article_l)
     # 将文章加入文章列表
     for i in article_l:
         article_list.append({
@@ -226,48 +196,10 @@ def bbs_my_site(request):
         })
     return JsonResponse(response_dic)
 
-# 文章详情
-# def bbs_article_detail(request):
-#     username = request.user.username
-#     article_id = request.GET.get('id')
 
-#     comment_list = []
-#     comment_l = models.Comment.objects.filter(article_id=article_id)
-
-#     for i in comment_l:
-#         if i.parent_id:
-#             user_id = models.Comment.objects.filter(id=i.parent_id).first().user_id
-#             parent_username = models.UserInfo.objects.filter(id=user_id).first().username
-#         else:
-#             parent_username = None
-#         comment_list.append({
-#             'comment_content': i.content,
-#             'username' : models.UserInfo.objects.filter(id=i.user_id).first().username,
-#             'parent_id' : i.parent_id,
-#             'parent_username' : parent_username
-#         })
-    
-#     article_obj = models.Article.objects.filter(id=article_id).first()
-#     print(article_obj)
-#     response_dic = {'code': 1000, 'message': 0,
-#         'data':{
-#             'title': article_obj.title,
-#             'content': article_obj.content,
-#             'create_time': article_obj.create_time,
-#             'up_num': article_obj.up_num,
-#             'username': article_obj.user.username,
-#             'comment_list' : comment_list
-#         }
-#     }
-
-#     return JsonResponse(response_dic)
 
 def article_detail(request,article_id):
-    # article_id = request.GET.get("article_id")
-    # article_id = 1
-    # print(article_id)
     article_obj = models.Article.objects.filter(pk=article_id).first()
-    # print(article_obj)
     if not article_obj:
         return render(request, 'errors.html')
     content_list = models.Comment.objects.filter(article=article_obj)
@@ -323,31 +255,15 @@ def bbs_comment(request):
             if parent_id:
                 print("hello")
                 receive_user = models.Comment.objects.filter(pk=parent_id).first().user
-                models.Message.objects.create(type='com', msg=article_id, send_user=request.user, receive_user=receive_user)
+                # models.Message.objects.create(type='com', msg=article_id, send_user=request.user, receive_user=receive_user)
         else:
             response_dic['code'] = 1001
             response_dic['msg'] = '用户未登录'
     return JsonResponse(response_dic)
 
-# @login_required
-# def bbs_add_article(request):
-#     if request.method == 'POST':
-#         title = request.POST.get('title')
-#         content = request.POST.get('content')
-#         # 获取文章内容
-#         soup = BeautifulSoup(content, 'html.parser')
-#         desc = soup.text[0:150]
-#         article_obj = models.Article.objects.create(
-#             title=title,
-#             content=str(soup),
-#             desc=desc,
-#             user=request.user
-#         )
-#         response_dic = {"code": 1000, "msg": 'success'}
-#         return JsonResponse(response_dic)
 
-# @login_required
-
+# 写文章
+@login_required
 def bbs_add_article(request):
     # print(request.user.username)
     if request.method == 'POST':
@@ -358,19 +274,19 @@ def bbs_add_article(request):
         #文章简介
         # desc = content[0:150]--截取文本150个
         desc = soup.text[0:150]
-        # article_obj= models.Article.objects.create(
-        #     title=title,
-        #     content=str(soup),
-        #     desc=desc,
-        #     user=request.user
-        # )
-
         article_obj= models.Article.objects.create(
             title=title,
             content=str(soup),
             desc=desc,
-            user=models.UserInfo.objects.filter(pk=1).first()
-        )#默认登陆状态user001
+            user=request.user
+        )
+
+        # article_obj= models.Article.objects.create(
+        #     title=title,
+        #     content=str(soup),
+        #     desc=desc,
+        #     user=models.UserInfo.objects.filter(pk=1).first()
+        # )#默认登陆状态user001
 
         response_dic = {"code": 1000, "msg": 'success'}
         return JsonResponse(response_dic)
@@ -392,6 +308,7 @@ def upload_image(request):
 def set_avatar(request):
     response_dic = {'code':2000,'message':'fail','data':''}
     if request.method == 'POST':
+        # print(request.FILES)
         file_obj = request.FILES.get('file')
         # file_dict  =  request.FILES
         # file_obj  = file_dict['file']
@@ -413,63 +330,17 @@ def bbs_delete_article(request):
     response_dic = {'code': 1000, 'message': "success"}
     return JsonResponse(response_dic)
 
-#虚拟合影测试
-# def AI_PIL(request):
-#     if request.method == "POST":
-#         # t=request.FILES['img']
-#         # file_Bytesio = BytesIO()
-#         # t.save(file_Bytesio)
-#         file_list  =  request.FILES
-#         print(file_list)
-#         img  = file_list['file']
-#         dt = time.strftime("%Y年%m月%d日%X")
 
-#         nt = dt.replace(":", "时", 1)
-#         nt = nt.replace(":", "分", 1)
-#         nt = nt + "秒"
-#         img_name =  request.POST.get("img_name")+'.png'
-#         #print(img_name)
-#         with open(img_name,"wb") as f:
-#             for i in img:
-#                 f.write(i)
-#         new_file_name = AI_img2nobg(img_name)  # AI转换
-
-#        # res_PIL_name = composite_picture("preview(1).png",new_file_name,100,100,500,500)
-#         dict_test = {"img_paste":new_file_name}
-#         return JsonResponse(dict_test)
-
-# def AI_PIL(request):
-#     if request.method == "POST":
-#         file_dict  =  request.FILES
-#         # print(file_list)
-#         img  = file_dict['file']
-#         print(img.name)
-#         dt = time.strftime("%Y年%m月%d日%X")
-
-#         nt = dt.replace(":", "时", 1)
-#         nt = nt.replace(":", "分", 1)
-#         nt = nt + "秒"
-#         img_name =  img.name
-#         print(img_name)
-#         with open(img_name,"wb") as f:
-#             for i in img:
-#                 f.write(i)
-#         new_file_name = AI_img2nobg(img_name)  # AI转换
-#         print(new_file_name)
-#         # res_PIL_name = composite_picture("preview(1).png",new_file_name,100,100,500,500)
-#         dict_test = {"img_paste":'for test'}
-#         # dict_test = {"img_paste":new_file_name}
-#         url_name = new_file_name[1:]
-#         return HttpResponse(url_name)
-
+# 虚拟合影--Done
 def AI_PIL(request):
+    # print(request.body)
     if request.method == "POST":
         file_dict  =  request.FILES
         img  = file_dict['file']
         new_img = AI_img2nobg(img)
         # print(new_img)
         encode_str='data:image/jpeg;base64,%s' % new_img
-        print("AIIMG")
+        # print("AIAIIMG")
         return HttpResponse(encode_str)
     
 
@@ -486,10 +357,13 @@ def add_myclass(request):      #接口实现添加班级
             education = request.POST.get('degree')
             Class = request.POST.get('Class')
             if models.OfficialList.objects.filter(name=name,campus=campus,major=major,education=education,Class=Class).exists():
-                class_name = campus+grade+major+education+Class
-                models.ClassesRecode.objects.update_or_create(name=name,campus=campus,grade=grade,major=major,education=education,Class=Class,class_name=class_name,user=user)
-                models.UserInfo.objects.filter(id=request.user.id).update(alumnus=1)
-                response_dic = {'code': 1000, 'message': "success"}
+                if models.ClassesRecode.objects.filter(name=name,campus=campus,major=major,education=education,Class=Class).exists():
+                    response_dic = {'code': 1004, 'message': "该认证信息已存在"}
+                else:
+                    class_name = campus+grade+major+education+Class
+                    models.ClassesRecode.objects.update_or_create(name=name,campus=campus,grade=grade,major=major,education=education,Class=Class,class_name=class_name,user=user)
+                    models.UserInfo.objects.filter(id=request.user.id).update(alumnus=1)
+                    response_dic = {'code': 1000, 'message': "success"}
             else:
                 response_dic = {'code': 1003, 'message': "认证失败"}
         else:
@@ -512,26 +386,32 @@ def search_class(request):     #接口实现班级搜索
             # print(class_name)
             class_list = []
             if len(name):
-                class_l = models.ClassesRecode.objects.filter(class_name=class_name,name=name)
-                for i in class_l:
-                    class_list.append({
-                        'name': i.name,
-                        'username': i.user.username,
-                        'email' : i.user.email
+                if models.ClassesRecode.objects.filter(class_name=class_name,name=name).exists():
+                    class_l = models.ClassesRecode.objects.filter(class_name=class_name,name=name)
+                    for i in class_l:
+                        class_list.append({
+                            'name': i.name,
+                            'username': i.user.username,
+                            'email' : i.user.email
 
-                    })
+                        })
+                    response_dic = {'code': 1000, 'message': "success", 'data': {'class_list': class_list}}
+                else: 
+                    response_dic = {'code': 1002, 'message': "查无此人"}
             else:
-                class_l = models.ClassesRecode.objects.filter(class_name=class_name)
+                if models.ClassesRecode.objects.filter(class_name=class_name).exists():
+                    class_l = models.ClassesRecode.objects.filter(class_name=class_name)
 
-                for i in class_l:
-                    class_list.append({
-                        'name': i.name,
-                        'username': i.user.username,
-                        'email' : i.user.email
-                    })
+                    for i in class_l:
+                        class_list.append({
+                            'name': i.name,
+                            'username': i.user.username,
+                            'email' : i.user.email
+                        })
                 # class_list = [1,2,3]
-            response_dic = {'code': 1000, 'message': "success", 'data': {'class_list': class_list}}
-
+                    response_dic = {'code': 1000, 'message': "success", 'data': {'class_list': class_list}}
+                else:
+                    response_dic = {'code': 1003, 'message': "查无此班"}
         else:
             response_dic = {'code': 1001, 'message': "未认证为校友"}
         return JsonResponse(response_dic)
@@ -567,10 +447,10 @@ def person_msg(request):
             })
     return JsonResponse(response_dic)
 
-# 测试版
+# 我的评论--Done
 def comment_to_me(request):
-    # user_obj = request.user
-    user_obj = models.UserInfo.objects.filter(pk=1).first() #测试版
+    user_obj = request.user
+    # user_obj = models.UserInfo.objects.filter(pk=1).first() #测试版
     username = user_obj.username
     user_id = user_obj.id
     
@@ -603,7 +483,7 @@ def comment_to_me(request):
                 'comment_id': l.id,
                 'comment_content' : l.content,
                 'comment_user' : comment_user.username,
-                'article_title': models.Article.objects.filter(id=j.article_id).first().title,
+                'article_title': models.Comment.objects.filter(id=l.parent_id).first().content,
                 'avatar':'http://www.fzuprrxd.work/media/%s' % comment_user.avatar,
                 'create_time': l.create_time.strftime("%Y-%m-%d"),
                 'article_url' :'http://www.fzuprrxd.work/bbs/article/%s/' % l.article_id
@@ -677,3 +557,10 @@ def message_Detail(request,username):#私信详情，具备回复功能，GET请
         response_dic2['message'] = '发送成功'
     return JsonResponse(response_dic2)
 
+
+def bbs_get_avatar(request):
+    if not request.user.is_authenticated:
+        return HttpResponse('please login')
+    avatar = models.UserInfo.objects.filter(pk=request.user.id).first().avatar
+    base64_str='data:image/jpeg;base64,%s' % base64.b64encode(avatar.file.read()).decode()
+    return HttpResponse(base64_str)
