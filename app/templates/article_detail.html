@@ -93,12 +93,12 @@
                     <!-- {#计算for循环次数#} -->
                     <span>#{{ forloop.counter }}楼</span>
                     <!-- {#<span>{{ comment.comment_time|data:"Y-m-d h-i-s" }}</span>#} -->
-                    <a href="/{{comment.user.username}}/"><span> {{ comment.user.username }}</span></a>
+                    <b><span> {{ comment.user.username }}</span></b>
                     <span><a class="pull-right reply" username="{{ comment.user.username }}" comment_id="{{ comment.pk }}">回复</a></span>
                     <div>
                         <!-- {# 判断是否是子评论 #} -->
                         {% if comment.parent_id %}
-                        <a href="/{{ comment.parent.user.username }}/"><span> @{{ comment.parent.user.username }}</span></a>
+                        <b><span> @{{ comment.parent.user.username }}</span></b>
                         {% endif %} 
                         <span>
                             {{ comment.content }}
@@ -143,7 +143,10 @@
                 success: function (args) {
                     // 成功点赞/踩
                     $('#digg_tips').html(args.msg)
-                    
+                    window.setTimeout(function ()
+                        {
+                            window.location.reload()
+                        },300)
                 }
 
             })
@@ -177,18 +180,7 @@
                         //将评论框的内容清空
                         $('#id_comment').val('')
 
-                        // //静态临时渲染评论楼
-                        // let username = '{{ request.user.username }}';
-                        // let temp = `
-                        //  <li class="list-group-item">
-                        //     <span>${username}</span>
-                        //     <span><a href="#" class="pull-right">回复</a></span>
-                        //     <div>
-                        //         ${args.pname}${conTent}
-                        //     </div>
-                        //     </li>
-                        // `
-                        // $('.list-group').append(temp)
+         
                         window.setTimeout(function ()
                         {
                             window.location.reload()
